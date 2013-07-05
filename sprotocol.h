@@ -10,31 +10,57 @@
 
 #include <stdint.h>
 
+#define SP_MAX_DATA_SIZE 6
+#define SP_MAX_CHANNEL_COUNT 15
+
+#define SP_STATUS_FREE 0
+#define SP_STATUS_BUSY 1
+#define SP_STATUS_READY 2
+
 #ifdef	__cplusplus
 extern "C" {
 #endif
     
-    typedef union __SPData {
-        uint8_t data8list[sizeof(uint64_t)];
-        uint16_t data16list[sizeof(uint64_t) / sizeof(uint16_t)];
-        uint32_t data32list[sizeof(uint64_t) / sizeof(uint32_t)];
-        uint64_t data64;
-    } SPData;
+    typedef union {
+        /* Unsigned */
+        uint8_t  u8list[sizeof(uint64_t)];
+        uint16_t u16list[sizeof(uint64_t) / sizeof(uint16_t)];
+        uint32_t u32list[sizeof(uint64_t) / sizeof(uint32_t)];
+        
+        /* Unsigned */
+        int8_t  s8list[sizeof(uint64_t)];
+        int16_t s16list[sizeof(uint64_t) / sizeof(int16_t)];
+        int32_t s32list[sizeof(uint64_t) / sizeof(int32_t)];
+        
+        int32_t intVal;
+        uint32_t uintVal;
+        
+        uint8_t  data[sizeof(uint64_t)];
+        uint64_t value;
+    } SPData __attribute__((__transparent_union__));
     
-    typedef enum __SPChanelStatus {
-        SPReady, SPBusy
-    } SPChanelStatus;
-    
-    typedef struct __SPChanel {
-        uint8_t chanel;
+    typedef struct {
+        uint8_t channel;
         SPData data;
-        SPChanelStatus status;
-    } SPChanel;
+    } SPPackage;
+    
+    typedef struct {
+        SPPackage *package;
+        int status;
+        int _steps;
+    } SPWorker;
     
     
-    SPChanelStatus SP_encodeByte( SPChanel *, uint8_t * );
-    SPChanelStatus SP_decodeByte( SPChanel *, uint8_t );
+    int SP_encodeByte( SPWorker *, uint8_t * );
+    int SP_decodeByte( SPWorker *, uint8_t );
     
+    int SP_encode( SPWorker *, uint8_t *, size_t );
+    int SP_decode( SPWorker *, uint8_t *, size_t );
+    
+    SPData SP_data( void *, size_t );
+    SPPackage SP_package( uint8_t, SPData );
+    SPWorker SP_worker( SPPackage * );
+
 #ifdef	__cplusplus
 }
 #endif

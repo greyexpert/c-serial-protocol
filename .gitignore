@@ -1,3 +1,6 @@
+# Directories
+nbproject
+
 # Object files
 *.o
 
@@ -15,3 +18,5 @@
 *.exe
 *.out
 *.app
+/dist/
+/build/
